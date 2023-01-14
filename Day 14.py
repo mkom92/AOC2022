@@ -1,74 +1,113 @@
+if __name__ == '__main__':
 
-rocks = set()
-with open('Day 14.txt','r') as txt_file:
+	# create a set of rocks coordinates from the input
 
-	for line in txt_file:
+	rocks = set()
+	with open('Day 14.txt','r') as txt_file:
 
-		points = [p for p in line.strip().split(' -> ')]
+		for line in txt_file:
 
-		for n in range(len(points)-1):
+			points = [p for p in line.strip().split(' -> ')]
 
-			x1,y1 = map(int,[i for i in points[n].split(',')])
-			x2,y2 = map(int,[i for i in points[n+1].split(',')])
+			for n in range(len(points)-1):
 
-			if x1 == x2:
+				x1,y1 = map(int,[i for i in points[n].split(',')])
+				x2,y2 = map(int,[i for i in points[n+1].split(',')])
 
-				min_y = min([y1,y2])
-				max_y = max([y1,y2]) + 1
+				if x1 == x2:
 
-				x = [x1]
-				y = [y_inp for y_inp in range(min_y,max_y)]
+					min_y = min([y1,y2])
+					max_y = max([y1,y2]) + 1
 
-			else:
+					x = [x1]
+					y = [y_inp for y_inp in range(min_y,max_y)]
 
-				min_x = min([x1,x2])
-				max_x = max([x1,x2]) + 1
+				else:
 
-				y = [y1]
-				x = [x_inp for x_inp in range(min_x,max_x)]
+					min_x = min([x1,x2])
+					max_x = max([x1,x2]) + 1
 
-			for xx in x:
+					y = [y1]
+					x = [x_inp for x_inp in range(min_x,max_x)]
 
-				for yy in y:
+				for xx in x:
 
-					rocks.add((xx,yy))
+					for yy in y:
+
+						rocks.add((xx,yy))
+
+	# get the bottom limit - if a grain of sand falls below this point, stop
+
+	ys = set()
+
+	for rock in rocks:
+
+		ys.add(rock[1])
 
 
-# print(sorted(rocks))
+	def falling_sand(max_y,star,x=500,y=0):
 
-sand = set()
+		yn = 0
 
+		run = True
+		while run:
 
-def falling_sand((x,y) = (500,0)):
+			grain_of_sand = (x, y + yn)
 
-	grain_of_sand = (x,y)
-	yn = 0
+			if grain_of_sand not in rocks and grain_of_sand not in sand:
 
-	while True:
-
-		grain_of_sand = (grain_of_sand[0], grain_of_sand[1] + yn)
-
-		if grain_of_sand not in rocks and grain_of_sand not in sand:
-
-			yn += 1 
-			continue
-
-		# elif grain_of_sand in sand:
-
-		else:
-
-			left = (grain_of_sand[0]-1,grain_of_sand[1])
-			right = (grain_of_sand[0]+1,grain_of_sand[1])
-
-			if left not in rocks and left not in sand:
-
-				falling_sand(left)
-
-			elif right not in rocks and right not in sand:
-
-				falling_sand(right)
+				yn += 1 
 
 			else:
+
+				left = (grain_of_sand[0]-1,grain_of_sand[1])
+				right = (grain_of_sand[0]+1,grain_of_sand[1])
+
+				if grain_of_sand == (x,y):
+					run = False
+					return run
+
+				elif left not in rocks and left not in sand:
+
+					run = falling_sand(max_y,star,left[0],left[1])
+
+				elif right not in rocks and right not in sand:
+
+					run = falling_sand(max_y,star,right[0],right[1])
+
+				else:
+
+					sand.add((grain_of_sand[0],grain_of_sand[1]-1))
+					return True
+
+			if star == 2 and grain_of_sand[1] == max_y:
 
 				sand.add((grain_of_sand[0],grain_of_sand[1]-1))
+				return True
 
+			if grain_of_sand[1] > max_y or grain_of_sand[1] < y:
+				run = False
+				return run
+
+
+	max_y = max(ys)
+	sand = set()
+
+
+	run = True
+	while run:
+		run = falling_sand(max_y = max_y,star=1)
+
+	print('Star 1:',len(sand))
+
+
+
+	max_y = max(ys) + 2
+	sand = set()
+
+
+	run = True
+	while run:
+		run = falling_sand(max_y = max_y,star=2)
+
+	print('Star 2:',len(sand))
